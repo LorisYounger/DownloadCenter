@@ -1,0 +1,10 @@
+﻿downloadcenter#path:|name#主目录:|fullname#\:|permission#0:|autofolder:|autofile:|
+disable:|is#bin,Web.config:|endwith#.lps,.dll,.css,.aspx:|
+readme:|title#主目录:|type#markdown:|:
+:### 关于DownloadCenter /n/n:
+|Download Center 是一款开源下载网站,可以方便的搭建下载站点  :
+|该版本为无数据库版本,通过lpt和Web.config文件修改网站设置:
+|### 项目地址:
+|Github: [https://github.com/LorisYounger/DownloadCenter](https://github.com/LorisYounger/DownloadCenter):
+|:
+|
