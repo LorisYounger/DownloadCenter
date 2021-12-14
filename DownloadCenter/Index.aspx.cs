@@ -33,6 +33,15 @@ namespace DownloadCenter
         }
         private void ShowFile(string pathname, int permission)
         {
+            if (Application["permission#" + permission + ":|" + pathname.ToLower()] != null)
+            {
+                Table.Text = (string)Application["permission#" + permission + ":|" + pathname.ToLower()];
+                Title = (string)Application["title:|permission#" + permission + ":|" + pathname.ToLower()];
+                h1title.InnerText = (string)Application["h1title:|permission#" + permission + ":|" + pathname.ToLower()];
+                CurrentFolder.InnerText = (string)Application["current:|permission#" + permission + ":|" + pathname.ToLower()];
+                h2readme.InnerText = (string)Application["h2readme:|permission#" + permission + ":|" + pathname.ToLower()];
+                return;
+            }
             string localpath = Path.GetDirectoryName(Page.Request.PhysicalPath);
             string lpspath = localpath + '\\' + pathname + "\\index.lps";
             if (!File.Exists(lpspath))
@@ -110,6 +119,7 @@ namespace DownloadCenter
 
 
             StringBuilder table = new StringBuilder();
+            DirectoryInfo currdi = new DirectoryInfo(localpath + '\\' + pathname);
             int id = 0;
             //先加index
             if (pathname != "" && pathname != "\\")
@@ -141,7 +151,8 @@ namespace DownloadCenter
                         {
                             time = Directory.GetLastWriteTime(localpath + '\\' + pathname.Replace("/", "__") + ".lps");
                         }
-                        table.AppendLine($"<tr class=\"bgcC\"><td>{++id}</td><td><a href=\"{HttpContext.Current.Request.Path}?rootPath={upperpath}\">{upperpath}</a></td><td>返回上一级</td><td>{(time == DateTime.MinValue ? "-" : time.ToShortDateString() + ' ' + time.ToShortTimeString())}</td><td>Upper</td><td>-</td></tr>");
+                        if (currdi.Exists && currdi.Parent.FullName != new FileInfo(HttpContext.Current.Request.PhysicalPath).Directory.FullName)
+                            table.AppendLine($"<tr class=\"bgcC\"><td>{++id}</td><td><a href=\"{HttpContext.Current.Request.Path}?rootPath={upperpath}\">{upperpath}</a></td><td>返回上一级</td><td>{(time == DateTime.MinValue ? "-" : time.ToShortDateString() + ' ' + time.ToShortTimeString())}</td><td>Upper</td><td>-</td></tr>");
                     }
                 }
                 else if (thisdi != null)
@@ -155,7 +166,7 @@ namespace DownloadCenter
             //自定义的文件夹和自动扫描的文件夹应该加在一起,所以新建一个类拿去用
 
             List<ItemFolder> items = new List<ItemFolder>();
-            DirectoryInfo currdi = new DirectoryInfo(localpath + '\\' + pathname);
+           
             if (lps != null)
             {
                 foreach (Line item in lps.FindAllLine("folder"))
@@ -221,6 +232,13 @@ namespace DownloadCenter
                 table.AppendLine(item.ToString(++id, Page));
 
             Table.Text = table.ToString();
+
+            //储存缓存
+            Application["permission#" + permission + ":|" + pathname.ToLower()] = Table.Text;
+            Application["title:|permission#" + permission + ":|" + pathname.ToLower()] = Title;
+            Application["h1title:|permission#" + permission + ":|" + pathname.ToLower()] = h1title.InnerText;
+            Application["current:|permission#" + permission + ":|" + pathname.ToLower()] = CurrentFolder.InnerText;
+            Application["h2readme:|permission#" + permission + ":|" + pathname.ToLower()] = h2readme.InnerText;
         }
         public class ItemFolder : IComparable<ItemFolder>
         {
