@@ -13,9 +13,20 @@ namespace DownloadCenter
 {
     public partial class Index : System.Web.UI.Page
     {
+        public static string rootPath = null;
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (rootPath == null)
+            {
+                if (ConfigurationManager.AppSettings["urlrewrite"].ToLower() == "true")
+                {
+                    rootPath = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Host + '/';
+                }
+                else
+                {
+                    rootPath = HttpContext.Current.Request.Path + "?rootPath=";
+                }
+            }
             string showpath = Page.Request.QueryString["rootPath"];
             if (string.IsNullOrEmpty(showpath))
                 showpath = "";
@@ -40,6 +51,7 @@ namespace DownloadCenter
                 h1title.InnerText = (string)Application["h1title:|permission#" + permission + ":|" + pathname.ToLower()];
                 CurrentFolder.InnerText = (string)Application["current:|permission#" + permission + ":|" + pathname.ToLower()];
                 h2readme.InnerText = (string)Application["h2readme:|permission#" + permission + ":|" + pathname.ToLower()];
+                ReadMe.Text = (string)Application["h2text:|permission#" + permission + ":|" + pathname.ToLower()];
                 return;
             }
             string localpath = Path.GetDirectoryName(Page.Request.PhysicalPath);
@@ -152,21 +164,21 @@ namespace DownloadCenter
                             time = Directory.GetLastWriteTime(localpath + '\\' + pathname.Replace("/", "__") + ".lps");
                         }
                         if (currdi.Exists && currdi.Parent.FullName != new FileInfo(HttpContext.Current.Request.PhysicalPath).Directory.FullName)
-                            table.AppendLine($"<tr class=\"bgcC\"><td>{++id}</td><td><a href=\"{HttpContext.Current.Request.Path}?rootPath={upperpath}\">{upperpath}</a></td><td>返回上一级</td><td>{(time == DateTime.MinValue ? "-" : time.ToShortDateString() + ' ' + time.ToShortTimeString())}</td><td>Upper</td><td>-</td></tr>");
+                            table.AppendLine($"<tr class=\"bgcC\"><td>{++id}</td><td><a href=\"{rootPath}{upperpath}\">{upperpath}</a></td><td>返回上一级</td><td>{(time == DateTime.MinValue ? "-" : time.ToShortDateString() + ' ' + time.ToShortTimeString())}</td><td>Upper</td><td>-</td></tr>");
                     }
                 }
                 else if (thisdi != null)
                 {
                     table.AppendLine($"<tr class=\"bgcA\"><td>{++id}</td><td><a href=\"{HttpContext.Current.Request.Path}\">{name}</a></td><td>返回主目录</td><td>{thisdi.LastWriteTime}</td><td>Index</td><td>-</td></tr>");
                     if (thisdi.Parent.FullName != new FileInfo(HttpContext.Current.Request.PhysicalPath).Directory.FullName)
-                        table.AppendLine($"<tr class=\"bgcC\"><td>{++id}</td><td><a href=\"{HttpContext.Current.Request.Path}?rootPath={thisdi.Parent.FullName.Replace(localpath, "")}\">{thisdi.Parent.Name}</a></td><td>返回上一级</td><td>{thisdi.Parent.LastWriteTime}</td><td>Upper</td><td>-</td></tr>");
+                        table.AppendLine($"<tr class=\"bgcC\"><td>{++id}</td><td><a href=\"{rootPath}{thisdi.Parent.FullName.Replace(localpath, "")}\">{thisdi.Parent.Name}</a></td><td>返回上一级</td><td>{thisdi.Parent.LastWriteTime}</td><td>Upper</td><td>-</td></tr>");
                 }
             }
             //然后是自定义的文件夹
             //自定义的文件夹和自动扫描的文件夹应该加在一起,所以新建一个类拿去用
 
             List<ItemFolder> items = new List<ItemFolder>();
-           
+
             if (lps != null)
             {
                 foreach (Line item in lps.FindAllLine("folder"))
@@ -239,6 +251,7 @@ namespace DownloadCenter
             Application["h1title:|permission#" + permission + ":|" + pathname.ToLower()] = h1title.InnerText;
             Application["current:|permission#" + permission + ":|" + pathname.ToLower()] = CurrentFolder.InnerText;
             Application["h2readme:|permission#" + permission + ":|" + pathname.ToLower()] = h2readme.InnerText;
+            Application["h2text:|permission#" + permission + ":|" + pathname.ToLower()] = ReadMe.Text;
         }
         public class ItemFolder : IComparable<ItemFolder>
         {
@@ -338,7 +351,7 @@ namespace DownloadCenter
                         {
                             per = "&permission=" + per;
                         }
-                        return $"<tr{classstr}><td>{id}</td><td><a href=\"{HttpContext.Current.Request.Path}?rootPath={Link}{per}\">{Name}</a></td><td>{Comments}</td><td>{(LastWriteTime == DateTime.MinValue ? "-" : LastWriteTime.ToShortDateString() + ' ' + LastWriteTime.ToShortTimeString())}</td><td>{Type}</td><td>{SizeToString(Size)}</td></tr>";
+                        return $"<tr{classstr}><td>{id}</td><td><a href=\"{rootPath}{Link}{per}\">{Name}</a></td><td>{Comments}</td><td>{(LastWriteTime == DateTime.MinValue ? "-" : LastWriteTime.ToShortDateString() + ' ' + LastWriteTime.ToShortTimeString())}</td><td>{Type}</td><td>{SizeToString(Size)}</td></tr>";
                     default:
                         return $"<tr{classstr}><td>{id}</td><td><a href=\"{Link}\">{Name}</a></td><td>{Comments}</td><td>{(LastWriteTime == DateTime.MinValue ? "-" : LastWriteTime.ToShortDateString() + ' ' + LastWriteTime.ToShortTimeString())}</td><td>{Type}</td><td>{SizeToString(Size)}</td></tr>";
 

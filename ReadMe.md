@@ -11,9 +11,10 @@ Download Center 是一款开源的下载网站,可以方便的搭建下载站点
 - 支持权限系统, 对部分用户隐藏部分文件,权限不足的用户无法浏览文件 (在无数据库版本中,仅支持通过url秘钥获取权限)
 - 描述支持MarkDown,HTML,纯文本等
 - 缓存功能,节省服务器性能
+- 支持 URLReWrite 可以像访问目录一样访问文件
 
 ### 项目示例
 
-LB软件下载中心 [https://download.exlb.org/](https://download.exlb.org/)  
+LB软件下载中心 [https://download.exlb.org/](https://download.exlb.org/) 
 如需查看lpt文件,使用高权限秘钥 [adminpassword](https://download.exlb.org/?permission=adminpassword)
 
